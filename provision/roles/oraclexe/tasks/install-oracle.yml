@@ -1,0 +1,7 @@
+---
+
+- name: copy oracle RPM file to VM
+  get_url: url=ftp://guestuser:password@192.168.0.12/Public/Coding/oracle-xe-11.2.0-1.0.x86_64.rpm dest=/tmp/oracle-xe-11.2.0-1.0.x86_64.rpm checksum="sha1:49e850d18d33d25b9146daa5e8050c71c30390b7"
+
+- name: install Oracle rpm
+  yum: state=present name=/tmp/oracle-xe-11.2.0-1.0.x86_64.rpm

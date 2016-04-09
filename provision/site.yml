@@ -1,0 +1,5 @@
+---
+
+- hosts: oracle
+  roles:
+  - oraclexe

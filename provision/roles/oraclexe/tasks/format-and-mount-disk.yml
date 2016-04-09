@@ -1,0 +1,13 @@
+---
+
+- name: label drive
+  shell: parted /dev/sdb mklabel gpt
+
+- name: make partition
+  shell: parted /dev/sdb mkpart primary 0% 100%
+
+- name: make file system
+  shell: mkfs -t ext4 /dev/sdb1
+
+- name: mount file system
+  mount: name=/u01 src=/dev/sdb1 fstype=ext4 state=mounted

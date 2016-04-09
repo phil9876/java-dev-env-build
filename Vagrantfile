@@ -1,31 +1,48 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+file_root = File.dirname(File.expand_path(__FILE__))
+
+u01_disk = File.join(file_root, 'disks/u01_disk.vdi')
+
 Vagrant.configure(2) do |config|
 
-  config.vm.box = "debian/jessie64"
+  config.vm.box = "mleonard87/oracle-linux-70-uek-x64"
 
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 1521, host: 1521
+  config.vm.network "forwarded_port", guest: 8443, host: 8443
 
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
-
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
+  config.vm.hostname = "javadev"
 
   config.vm.synced_folder ".", "/vagrant"
 
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
+  config.vm.provider "virtualbox" do |vbox|
+    unless File.exist?(u01_disk)
+      vbox.customize ['createhd', '--filename', u01_disk, '--size', 5*1024]
+    end
+    vbox.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0,
+                    '--type', 'hdd', '--medium', u01_disk]
+  end
+
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "provision/site.yml"
+    ansible.sudo = true
+    ansible.groups = {
+        "oracle" => ["default"]
+    }
+  end
+
+
+
+
+
+
+
+
+
+  #config.vm.synced_folder "tomcat/logs", "/var/tomcat/logs", mount_options: ["dmode=777, fmode=666"]
+  config.vm.synced_folder "tomcat/webapps", "/var/tomcat/logs", mount_options: ["dmode=777, fmode=666"]
+
 
 end
